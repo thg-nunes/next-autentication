@@ -1,12 +1,16 @@
-import { createContext, ReactNode } from "react";
+import { AxiosResponse } from "axios";
+import Router from "next/router";
+import { createContext, ReactNode, useState } from "react";
 
-type CredentialsProps = {
+import { api } from "../services/api";
+
+type SignInCredentials = {
     email: string
     password: string
 }
 
-type AuthContextProps = {
-    signIn(credentials: CredentialsProps): Promise<void>
+type AuthContextData = {
+    signIn(credentials: SignInCredentials): Promise<void>
     isAutenticated: boolean
 }
 
@@ -14,12 +18,37 @@ type AuthContextProviderProps = {
     children: ReactNode
 }
 
-export const AuthContext = createContext({} as AuthContextProps)
+type SignInResponseProps = {
+    email: string
+    roles: string[]
+    permissions: string[]
+}
+
+export const AuthContext = createContext({} as AuthContextData)
 
 export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
+    const [userData, setUserData] = useState<SignInResponseProps>()
     const isAutenticated = false 
-    async function signIn({ email, password }: CredentialsProps) {
-        console.log({ email, password })
+
+    async function signIn({ email, password }: SignInCredentials) {
+        try {
+            const response: AxiosResponse<SignInResponseProps> = await api.post('/sessions', {
+                email,
+                password
+            })
+    
+            const { permissions, roles } = response.data
+    
+            setUserData({
+                email,
+                permissions,
+                roles
+            })
+    
+            Router.push('/dashboard')
+        } catch (error) {
+            alert(error)
+        }
     }
 
     return (

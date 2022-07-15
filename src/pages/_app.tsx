@@ -1,5 +1,5 @@
 import type { AppProps } from 'next/app'
-import { AuthContextProvider } from '../src/contexts/authContext'
+import { AuthContextProvider } from '../contexts/authContext'
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
